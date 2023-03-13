@@ -6,8 +6,11 @@ import {
   useState,
 } from "react";
 import { Convert } from "easy-currencies";
-import { exchangeRates } from "exchange-rates-api";
-import { sub } from "date-fns";
+import { format, sub } from "date-fns";
+import {
+  ExchangeHistory,
+  getExchangeHistory,
+} from "../services/exchange-history";
 
 const CURRENCIES = [
   "USD",
@@ -175,8 +178,9 @@ const CURRENCIES = [
 
 export type Currency = typeof CURRENCIES[number];
 
-type ConverterFetchResponse = {
-  [key in Currency]: number;
+export type GraphicData = {
+  date: string;
+  value: number;
 };
 
 export interface CurrencyContextProps {
@@ -189,6 +193,7 @@ export interface CurrencyContextProps {
   exchangeAmount: number;
   handleInverse: () => Promise<void>;
   allowedCurrencies: typeof CURRENCIES;
+  graphicData: GraphicData[];
 }
 
 const currencyContext = createContext<CurrencyContextProps>(
@@ -200,10 +205,11 @@ export const CurrencyProvider = (props: { children: React.ReactNode }) => {
   const [toCurrency, setToCurrency] = useState<Currency>("BRL");
   const [amount, setAmount] = useState(0);
   const [exchangeAmount, setExchangeAmount] = useState(0);
+  const [graphicData, setGraphicData] = useState<GraphicData[]>([]);
 
   const last30Days = {
-    from: sub(new Date(), { days: 30 }),
-    to: new Date(),
+    from: format(sub(new Date(), { days: 30 }), "yyyy-MM-dd"),
+    to: format(new Date(), "yyyy-MM-dd"),
   };
 
   const handleConvert = (rate: number) => {
@@ -215,9 +221,9 @@ export const CurrencyProvider = (props: { children: React.ReactNode }) => {
   const handleInverse = async () => {
     setFromCurrency(toCurrency);
     setToCurrency(fromCurrency);
+    await handleFetchHistorical();
     if (amount === 0) return;
     await handleFetchCurrencies();
-    // await handleFetchHistorical();
   };
 
   const handleFetchCurrencies = useCallback(async () => {
@@ -227,14 +233,41 @@ export const CurrencyProvider = (props: { children: React.ReactNode }) => {
   }, [fromCurrency, toCurrency, amount]);
 
   const handleFetchHistorical = useCallback(async () => {
-    const response = await exchangeRates()
-      .from(last30Days.from)
-      .to(last30Days.to)
-      .base(fromCurrency)
-      .symbols(toCurrency)
-      .fetch();
+    const historical = JSON.parse(
+      localStorage.getItem("historical") ?? "{}"
+    ) as ExchangeHistory;
 
-    console.log(response);
+    const lastHistory = new Date(historical.end_date).getTime();
+    const today = new Date(last30Days.to).getTime();
+
+    if (
+      historical.base === fromCurrency &&
+      historical.end_date &&
+      lastHistory <= today
+    ) {
+      setGraphicData(
+        Object.keys(historical.rates).map((date) => ({
+          date,
+          value: historical.rates[date][toCurrency],
+        }))
+      );
+      return;
+    }
+
+    const response = await getExchangeHistory(
+      fromCurrency,
+      toCurrency,
+      last30Days.from,
+      last30Days.to
+    );
+
+    localStorage.setItem("historical", JSON.stringify(response));
+    setGraphicData(
+      Object.keys(response.rates).map((date) => ({
+        date,
+        value: response.rates[date][toCurrency],
+      }))
+    );
   }, [fromCurrency]);
 
   useEffect(() => {
@@ -247,7 +280,7 @@ export const CurrencyProvider = (props: { children: React.ReactNode }) => {
 
   useEffect(() => {
     handleFetchCurrencies();
-    // handleFetchHistorical();
+    handleFetchHistorical();
   }, [fromCurrency, toCurrency]);
 
   return (
@@ -261,6 +294,7 @@ export const CurrencyProvider = (props: { children: React.ReactNode }) => {
         setAmount,
         exchangeAmount,
         handleInverse,
+        graphicData,
         allowedCurrencies: CURRENCIES,
       }}
     >
