@@ -194,6 +194,7 @@ export interface CurrencyContextProps {
   handleInverse: () => Promise<void>;
   allowedCurrencies: typeof CURRENCIES;
   graphicData: GraphicData[];
+  isLoadingGraph: boolean;
 }
 
 const currencyContext = createContext<CurrencyContextProps>(
@@ -203,8 +204,9 @@ const currencyContext = createContext<CurrencyContextProps>(
 export const CurrencyProvider = (props: { children: React.ReactNode }) => {
   const [fromCurrency, setFromCurrency] = useState<Currency>("USD");
   const [toCurrency, setToCurrency] = useState<Currency>("BRL");
-  const [amount, setAmount] = useState(0);
-  const [exchangeAmount, setExchangeAmount] = useState(0);
+  const [amount, setAmount] = useState<number>(0);
+  const [exchangeAmount, setExchangeAmount] = useState<number>(0);
+  const [isLoadingGraph, setIsLoadingGraph] = useState<boolean>(false);
   const [graphicData, setGraphicData] = useState<GraphicData[]>([]);
 
   const last30Days = {
@@ -254,20 +256,26 @@ export const CurrencyProvider = (props: { children: React.ReactNode }) => {
       return;
     }
 
-    const response = await getExchangeHistory(
-      fromCurrency,
-      toCurrency,
-      last30Days.from,
-      last30Days.to
-    );
+    try {
+      setIsLoadingGraph(true);
 
-    localStorage.setItem("historical", JSON.stringify(response));
-    setGraphicData(
-      Object.keys(response.rates).map((date) => ({
-        date,
-        value: response.rates[date][toCurrency],
-      }))
-    );
+      const response = await getExchangeHistory(
+        fromCurrency,
+        toCurrency,
+        last30Days.from,
+        last30Days.to
+      );
+
+      localStorage.setItem("historical", JSON.stringify(response));
+      setGraphicData(
+        Object.keys(response.rates).map((date) => ({
+          date,
+          value: response.rates[date][toCurrency],
+        }))
+      );
+    } finally {
+      setIsLoadingGraph(false);
+    }
   }, [fromCurrency]);
 
   useEffect(() => {
@@ -295,6 +303,7 @@ export const CurrencyProvider = (props: { children: React.ReactNode }) => {
         exchangeAmount,
         handleInverse,
         graphicData,
+        isLoadingGraph,
         allowedCurrencies: CURRENCIES,
       }}
     >

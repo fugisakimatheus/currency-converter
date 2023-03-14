@@ -1,5 +1,6 @@
 import { CurrencyInput } from "./components/input";
 import { FaExchangeAlt } from "react-icons/fa";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { useCurrency } from "./contexts/currency";
 import ReactApexChart from "react-apexcharts";
 
@@ -14,6 +15,7 @@ function App() {
     setToCurrency,
     handleInverse,
     graphicData,
+    isLoadingGraph,
   } = useCurrency();
 
   const series = [
@@ -102,7 +104,7 @@ function App() {
 
   return (
     <div className="h-screen w-screen flex items-center justify-center">
-      <div className="bg-white w-full h-full max-w-[660px] max-h-[700px] p-6 rounded-md md:shadow-xl border border-indigo-200">
+      <div className="bg-white w-full h-full max-w-[660px] max-h-[700px] p-6 md:rounded-md md:shadow-xl border border-indigo-200">
         <h1 className="text-indigo-500 text-2xl font-bold">
           Conversor de moedas
         </h1>
@@ -136,15 +138,28 @@ function App() {
         </div>
 
         <div>
-          <h2 className="text-indigo-600 text-lg">
+          <h2 className="text-indigo-600 text-lg mb-4">
             Cotação nos últimos 30 dias
           </h2>
-          <ReactApexChart
-            options={chartOptions}
-            series={series}
-            type="area"
-            width="100%"
-          />
+          {isLoadingGraph && (
+            <div className="mt-2 rounded-md bg-gradient-to-t flex flex-col items-center from-indigo-100 to-white h-[212px] md:h-[340px] justify-center">
+              <AiOutlineLoading3Quarters
+                className="animate-spin text-indigo-500"
+                size="48px"
+              />
+              <span className="mt-5 text-base text-indigo-500 font-semibold">
+                Carregando Informações
+              </span>
+            </div>
+          )}
+          {!isLoadingGraph && (
+            <ReactApexChart
+              options={chartOptions}
+              series={series}
+              type="area"
+              width="100%"
+            />
+          )}
         </div>
       </div>
     </div>
