@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="dark">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="money-wallet.png" />
@@ -7,6 +7,19 @@
     <title>Conversor de moedas</title>
   </head>
   <body>
+    <script>
+      (function () {
+        var theme = localStorage.getItem("currency-converter-theme");
+        var root = document.documentElement;
+        if (theme === "light") {
+          root.classList.remove("dark");
+          root.classList.add("light");
+        } else {
+          root.classList.remove("light");
+          root.classList.add("dark");
+        }
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

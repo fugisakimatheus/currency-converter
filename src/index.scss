@@ -2,11 +2,196 @@
 @tailwind components;
 @tailwind utilities;
 
-html, body {
-  @apply bg-neutral-100 text-neutral-800 text-base;
-  font-family: Roboto, sans-serif;
+@layer base {
+  html {
+    @apply antialiased;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  html.light {
+    color-scheme: light;
+  }
+
+  body {
+    @apply min-h-screen text-base text-slate-800;
+    font-family: Roboto, system-ui, sans-serif;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    body:not(.theme-transition-active) {
+      @apply transition-colors duration-300;
+    }
+  }
+
+  html.dark body {
+    @apply bg-slate-900 text-slate-100;
+  }
+
+  html.light body {
+    @apply bg-slate-100 text-slate-800;
+  }
+
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
 }
 
-input, select {
-  @apply bg-neutral-100 text-neutral-600 h-8 outline-none font-semibold;
+@layer components {
+  .app-shell {
+  }
+
+  html.dark .app-shell {
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.25), transparent),
+      radial-gradient(ellipse 60% 40% at 100% 100%, rgba(139, 92, 246, 0.12), transparent),
+      #020617;
+  }
+
+  html.light .app-shell {
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.15), transparent),
+      radial-gradient(ellipse 60% 40% at 0% 100%, rgba(129, 140, 248, 0.12), transparent),
+      #f1f5f9;
+  }
+
+  .glass-panel {
+    @apply rounded-3xl border shadow-2xl backdrop-blur-xl;
+  }
+
+  html.dark .glass-panel {
+    @apply border-white/10 bg-slate-900/60 shadow-indigo-950/40;
+  }
+
+  html.light .glass-panel {
+    @apply border-indigo-200/60 bg-white/70 shadow-indigo-200/50;
+  }
+
+  .glass-input {
+    @apply border backdrop-blur-md transition-colors;
+  }
+
+  html.dark .glass-input {
+    @apply border-white/10 bg-white/5 hover:border-indigo-400/30;
+  }
+
+  html.light .glass-input {
+    @apply border-indigo-100/80 bg-white/80 hover:border-indigo-300;
+  }
+
+  .glass-select {
+    @apply cursor-pointer border outline-none backdrop-blur-sm transition-colors;
+  }
+
+  html.dark .glass-select {
+    @apply border-white/10 bg-slate-800/80;
+  }
+
+  html.light .glass-select {
+    @apply border-indigo-100 bg-indigo-50/80;
+  }
+
+  .glass-button {
+    @apply border backdrop-blur-md transition-all;
+  }
+
+  html.dark .glass-button {
+    @apply border-white/10 bg-white/5 hover:bg-white/10;
+  }
+
+  html.light .glass-button {
+    @apply border-indigo-100 bg-white/60 hover:bg-white/90;
+  }
+
+  .converter-fields {
+    @apply grid gap-4;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .converter-swap {
+    @apply mx-auto;
+  }
+
+  @media (min-width: 640px) {
+    .converter-fields {
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      align-items: end;
+      column-gap: 0.75rem;
+    }
+
+    .converter-swap {
+      @apply mx-0 self-end;
+      margin-bottom: 0.125rem;
+    }
+  }
+
+  .glass-chart-placeholder {
+    @apply rounded-2xl border backdrop-blur-sm;
+  }
+
+  html.dark .glass-chart-placeholder {
+    @apply border-white/10 bg-white/5;
+  }
+
+  html.light .glass-chart-placeholder {
+    @apply border-indigo-100/80 bg-indigo-50/40;
+  }
+
+  .theme-transition-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .theme-transition-circle {
+    position: absolute;
+    border-radius: 50%;
+    transform-origin: center center;
+    box-shadow: 0 0 120px 40px rgba(99, 102, 241, 0.5);
+    outline: 3px solid rgba(129, 140, 248, 0.65);
+    will-change: transform;
+  }
+
+  .theme-toggle-pin {
+    position: fixed;
+    z-index: 50;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    backdrop-filter: blur(12px);
+  }
+
+  html.dark .theme-toggle-pin {
+    background: rgba(15, 23, 42, 0.92);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+  }
+
+  html.light .theme-toggle-pin {
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.15);
+  }
+
+  .theme-toggle:active {
+    transform: scale(0.92);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .theme-toggle {
+      transition: transform 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+    }
+  }
+
 }

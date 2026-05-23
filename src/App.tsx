@@ -1,8 +1,9 @@
-import { CurrencyInput } from "./components/input";
-import { FaExchangeAlt } from "react-icons/fa";
-import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import { ConverterFields } from "./components/converter-fields";
+import { ExchangeChart } from "./components/exchange-chart";
+import { ThemeTransitionOverlay } from "./components/theme-transition-overlay";
+import { ThemeToggle } from "./components/theme-toggle";
 import { useCurrency } from "./contexts/currency";
-import ReactApexChart from "react-apexcharts";
+import { useTheme } from "./contexts/theme";
 
 function App() {
   const {
@@ -14,153 +15,62 @@ function App() {
     setFromCurrency,
     setToCurrency,
     handleInverse,
+    allowedCurrencies,
     graphicData,
     isLoadingGraph,
+    graphError,
   } = useCurrency();
 
-  const series = [
-    {
-      name: `Cotação ${fromCurrency} para ${toCurrency}`,
-      data: graphicData.map((item) => [
-        new Date(item.date).getTime(),
-        item.value,
-      ]),
-    },
-  ];
-
-  const chartOptions: any = {
-    chart: {
-      type: "area",
-      toolbar: {
-        show: false,
-      },
-    },
-    colors: ["rgb(99, 102, 241)"],
-    dataLabels: {
-      enabled: false,
-    },
-    stroke: {
-      curve: "straight",
-    },
-    yaxis: {
-      tickAmount: 5,
-      labels: {
-        formatter: (labelValue: number) =>
-          (Math.round(labelValue * 100) / 100).toString().replace(".", ","),
-      },
-    },
-    xaxis: {
-      labels: {
-        show: false,
-      },
-      tooltip: {
-        enabled: false,
-      },
-      axisTicks: {
-        show: false,
-      },
-    },
-    fill: {
-      gradient: {
-        shadeIntensity: 1,
-        opacityFrom: 0.8,
-        opacityTo: 1,
-        stops: [0, 100],
-      },
-    },
-    tooltip: {
-      custom: function ({ series, seriesIndex, dataPointIndex, w }: any) {
-        /* eslint-disable indent */
-        return `
-          <div class="flex column tooltip px-2 font-semibold text-indigo-600">
-            <div class="mr-1">
-              <span>
-                ${(
-                  Math.round(
-                    Number(series[seriesIndex][dataPointIndex]) * 100
-                  ) / 100
-                )
-                  .toString()
-                  .replace(".", ",")}
-              </span>
-            </div>
-
-            <div>
-              <span>
-                ${new Date(w.globals.seriesX[seriesIndex][dataPointIndex])
-                  .toLocaleDateString("pt-BR", {
-                    weekday: "short",
-                    month: "short",
-                    day: "numeric",
-                  })
-                  .replace(".", "")}
-              </span>
-            </div>
-          </div>
-        `;
-      },
-    },
-  };
+  const { theme, themeTransition } = useTheme();
 
   return (
-    <div className="h-screen w-screen flex items-center justify-center">
-      <div className="bg-white w-full h-full max-w-[660px] max-h-[700px] p-6 md:rounded-md md:shadow-xl border border-indigo-200">
-        <h1 className="text-indigo-500 text-2xl font-bold">
-          Conversor de moedas
-        </h1>
+    <div className="app-shell relative flex min-h-screen w-full items-center justify-center p-4 sm:p-8">
+      <ThemeTransitionOverlay phase={themeTransition} />
 
-        <div className="flex md:flex-row flex-col items-center w-full pt-8 pb-14">
-          <div className="w-full">
-            <CurrencyInput
-              value={amount}
-              onChange={setAmount}
-              selectValue={fromCurrency}
-              onSelectChange={setFromCurrency}
-            />
+      <div className="glass-panel relative w-full max-w-2xl overflow-hidden p-6 sm:p-8">
+        <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-indigo-500/20 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-20 -left-16 h-56 w-56 rounded-full bg-violet-500/15 blur-3xl" />
+
+        <header className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-indigo-500 dark:text-indigo-400">
+              Câmbio em tempo real
+            </p>
+            <h1 className="mt-1 text-2xl font-bold text-slate-900 dark:text-white sm:text-3xl">
+              Conversor de moedas
+            </h1>
           </div>
-
-          <div className="m-4">
-            <FaExchangeAlt
-              size="20px"
-              className="cursor-pointer transition-colors text-indigo-500 hover:text-indigo-400"
-              onClick={handleInverse}
-            />
+          <div className="h-10 w-10 shrink-0">
+            <ThemeToggle />
           </div>
+        </header>
 
-          <div className="w-full">
-            <CurrencyInput
-              value={exchangeAmount}
-              selectValue={toCurrency}
-              onSelectChange={setToCurrency}
-              isReadonly
-            />
-          </div>
-        </div>
+        <ConverterFields
+          amount={amount}
+          exchangeAmount={exchangeAmount}
+          fromCurrency={fromCurrency}
+          toCurrency={toCurrency}
+          allowedCurrencies={allowedCurrencies}
+          onAmountChange={setAmount}
+          onFromCurrencyChange={setFromCurrency}
+          onToCurrencyChange={setToCurrency}
+          onInverse={handleInverse}
+        />
 
-        <div>
-          <h2 className="text-indigo-600 text-lg mb-4">
+        <section className="relative mt-10">
+          <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200">
             Cotação nos últimos 30 dias
           </h2>
-          {isLoadingGraph && (
-            <div className="mt-2 rounded-md bg-gradient-to-t flex flex-col items-center from-indigo-100 to-white h-[212px] md:h-[340px] justify-center">
-              <AiOutlineLoading3Quarters
-                className="animate-spin text-indigo-500"
-                size="48px"
-              />
-              <span className="mt-5 text-base text-indigo-500 font-semibold">
-                Carregando Informações
-              </span>
-            </div>
-          )}
-          {!isLoadingGraph && (
-            <ReactApexChart
-              options={chartOptions}
-              series={series}
-              type="area"
-              width="100%"
-            />
-          )}
-        </div>
+
+          <ExchangeChart
+            fromCurrency={fromCurrency}
+            toCurrency={toCurrency}
+            graphicData={graphicData}
+            isLoading={isLoadingGraph}
+            error={graphError}
+            theme={theme}
+          />
+        </section>
       </div>
     </div>
   );
