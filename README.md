@@ -16,14 +16,16 @@ Aplicação web para conversão de moedas em tempo real, com histórico de cota�
 
 ## Stack
 
-| Camada | Tecnologia |
-|--------|------------|
-| UI | React 18, TypeScript |
-| Build | Vite 4 |
-| Estilos | Tailwind CSS 3, Sass |
-| Gráficos | ApexCharts (`react-apexcharts`) |
-| Ícones | `react-icons` |
-| API | Frankfurter (via proxy na mesma origem) |
+
+| Camada   | Tecnologia                              |
+| -------- | --------------------------------------- |
+| UI       | React 18, TypeScript                    |
+| Build    | Vite 4                                  |
+| Estilos  | Tailwind CSS 3, Sass                    |
+| Gráficos | ApexCharts (`react-apexcharts`)         |
+| Ícones   | `react-icons`                           |
+| API      | Frankfurter (via proxy na mesma origem) |
+
 
 ## Estrutura do projeto
 
@@ -59,10 +61,10 @@ currency-converter/
 
 ### Fluxo de dados
 
-1. **`CurrencyProvider`** mantém moedas, valor digitado e valor convertido.
-2. **`useCurrencyPair`** busca cotação atual + série histórica, com cache local.
-3. **`ThemeProvider`** controla tema, animação de revelação e aplica classes em `<html>`.
-4. **`App`** compõe conversor, gráfico e overlay de transição de tema.
+1. `**CurrencyProvider**` mantém moedas, valor digitado e valor convertido.
+2. `**useCurrencyPair**` busca cotação atual + série histórica, com cache local.
+3. `**ThemeProvider**` controla tema, animação de revelação e aplica classes em `<html>`.
+4. `**App**` compõe conversor, gráfico e overlay de transição de tema.
 
 ## Pré-requisitos
 
@@ -114,11 +116,13 @@ O projeto inclui configuração para [Vercel](https://vercel.com/) via `vercel.j
 
 ## Scripts npm
 
-| Script | Descrição |
-|--------|-----------|
-| `npm run dev` | Servidor de desenvolvimento |
-| `npm run build` | `tsc` + build Vite em `dist/` |
-| `npm run preview` | Serve o build localmente |
+
+| Script            | Descrição                     |
+| ----------------- | ----------------------------- |
+| `npm run dev`     | Servidor de desenvolvimento   |
+| `npm run build`   | `tsc` + build Vite em `dist/` |
+| `npm run preview` | Serve o build localmente      |
+
 
 ---
 
